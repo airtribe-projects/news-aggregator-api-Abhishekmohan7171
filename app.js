@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const port = process.env.PORT || 3000;
+const userRouter = require('./routes/users');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO).then(() => {
@@ -11,9 +12,15 @@ mongoose.connect(process.env.MONGO).then(() => {
     console.log('Error connecting to MongoDB', err.message);
 })
 
+const logger = (req,res,next) => {
+    console.log(`${req.method} Request recieved on ${req.url}`);
+    next()
+}
+
+app.use(logger)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.use('/api/v1/users',userRouter)
 
 app.listen(port, (err) => {
     if (err) {
@@ -21,7 +28,5 @@ app.listen(port, (err) => {
     }
     console.log(`Server is listening on ${port}`);
 });
-
-
 
 module.exports = app;
