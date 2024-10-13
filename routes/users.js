@@ -36,6 +36,7 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
   const dbUser = await User.findOne({ email });
+  console.log(dbUser)
   if (!dbUser) {
     return res.status(404).send({ message: "Email not found" });
   }
@@ -44,7 +45,7 @@ router.post("/login", async (req, res) => {
     return res.status(404).send({ message: "Password incorrect" });
   }
   const token = jwt.sign(
-    {id:dbUser.id, role: dbUser.role, preferences: dbUser.preferences },
+    {id:dbUser.id, role: dbUser.role },
     process.env.JWT_SECRET,
     { expiresIn: "1h" }
   );

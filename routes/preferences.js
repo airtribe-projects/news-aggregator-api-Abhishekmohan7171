@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const User = require("../models/users");
 const jwt = require('jsonwebtoken');
 const {validateJwt} = require('../middleware/validateJwt');
 
@@ -12,11 +13,14 @@ router.get('/',validateJwt, (req,res)=>{
 })
 
 //update preferences
-router.put('/update',validateJwt, (req,res) => {
+router.put('/update',validateJwt,async (req,res) => {
     if(!req.user){
         return res.status(401).send({message:'Unauthorized'});
     }
-    let preferences = req.user.preferences;
+    const id = req.user.id;
+    const dbUser = await User.findById(id);
+    console.log(dbUser,"->>>>>>>>>>>>>>")
+    let preferences = dbUser.preferences;
     // const id = req.params.id;
     // const user = dbUser.find((user) => user.id === id);
     // console.log(user,"-------------------")

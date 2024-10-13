@@ -1,9 +1,8 @@
 const express = require('express');
 require("dotenv").config()
 const router = express.Router();
+const User = require("../models/users");
 const axios = require('axios');
-const jwt = require('jsonwebtoken');
-const apiKey = process.env.NEWS
 const {validateJwt} = require('../middleware/validateJwt');
 
 //fetch all news as per user preferences
@@ -13,7 +12,9 @@ router.get('/',validateJwt,async (req,res) => {
     }
 
     try {
-        const preferences = req.user.preferences;
+        const id = req.user.id;
+        const dbUser = await User.findById(id);
+        const preferences = dbUser.preferences;
         if (!preferences || preferences.length === 0) {
             return res.status(400).send({ message: 'No preferences provided' });
         }
