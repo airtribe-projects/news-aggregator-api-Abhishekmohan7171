@@ -2,9 +2,9 @@ const express = require("express");
 require("dotenv").config();
 const router = express.Router();
 const User = require("../models/users");
+const News = require("../models/news")
 const axios = require("axios");
 const { validateJwt } = require("../middleware/validateJwt");
-
 const NodeCache = require('node-cache');
 const newsCache = new NodeCache({ stdTTL: 3600 });
 
@@ -33,7 +33,9 @@ router.get("/", validateJwt, async (req, res) => {
     );
     // Store in cache
     newsCache.set(queries, response.data.articles);
-    res.send({ news: response.data.articles });
+    //Adding the news in DB
+    const dbNews = await News.create(response.data.articles);
+    res.send({ news: dbNews});
   } catch (err) {
     console.error("Error fetching news:", err);
     if (err.response) {
@@ -71,51 +73,63 @@ router.get("/search/:keyword", validateJwt, async (req, res) => {
 });
 
 // Mark a news article as read
-// router.post('/:id/read',validateJwt, async (req, res) => {
-//     try {
-//         const articleId = req.params.id;
-//         // Add the article ID to the user's read list
-//         await User.updateOne({ _id: req.user._id }, { $addToSet: { readArticles: articleId } });
-//         res.send({ message: 'Article marked as read' });
-//     } catch (err) {
-//         console.error('Error marking article as read:', err);
-//         res.status(500).send({ message: 'Error marking article as read' });
-//     }
-// });
+router.post('/:id/read',validateJwt, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+    try {
+        const articleId = req.params.id;
+        // Add the article ID to the user's read list
+        await News.findByIdAndUpdate(articleId,{read:true});
+        res.send({ message: 'Article marked as read' });
+    } catch (err) {
+        console.error('Error marking article as read:', err);
+        res.status(500).send({ message: 'Error marking article as read' });
+    }
+});
 
 // // Mark a news article as favorite
-// router.post('/:id/favorite',validateJwt, async (req, res) => {
-//     try {
-//         const articleId = req.params.id;
-//         // Add the article ID to the user's favorite list
-//         await User.updateOne({ _id: req.user._id }, { $addToSet: { favoriteArticles: articleId } });
-//         res.send({ message: 'Article marked as favorite' });
-//     } catch (err) {
-//         console.error('Error marking article as favorite:', err);
-//         res.status(500).send({ message: 'Error marking article as favorite' });
-//     }
-// });
+router.post('/:id/favourite',validateJwt, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+    try {
+        const articleId = req.params.id;
+        // Add the article ID to the user's read list
+        await News.findByIdAndUpdate(articleId,{favourite:true});
+        res.send({ message: 'Article marked as favourite' });
+    } catch (err) {
+        console.error('Error marking article as favourite:', err);
+        res.status(500).send({ message: 'Error marking article as Favourite' });
+    }
+});
 
-// // Retrieve all read news articles
-// router.get('/read',validateJwt, async (req, res) => {
-//     try {
-//         const user = await User.findById(req.user._id).populate('readArticles');
-//         res.send({ readArticles: user.readArticles });
-//     } catch (err) {
-//         console.error('Error retrieving read articles:', err);
-//         res.status(500).send({ message: 'Error retrieving read articles' });
-//     }
-// });
+// Retrieve all read news articles
+router.get('/read',validateJwt, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+    try {
+        const read = await News.find({read: true});
+        res.send({ readArticles: read});
+    } catch (err) {
+        console.error('Error retrieving read articles:', err);
+        res.status(500).send({ message: 'Error retrieving read articles' });
+    }
+});
 
 // // Retrieve all favorite news articles
-// router.get('/favorites',validateJwt, async (req, res) => {
-//     try {
-//         const user = await User.findById(req.user._id).populate('favoriteArticles');
-//         res.send({ favoriteArticles: user.favoriteArticles });
-//     } catch (err) {
-//         console.error('Error retrieving favorite articles:', err);
-//         res.status(500).send({ message: 'Error retrieving favorite articles' });
-//     }
-// });
+router.get('/favourites',validateJwt, async (req, res) => {
+    if (!req.user) {
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+    try {
+        const read = await News.find({read: true});
+        res.send({ readArticles: read});
+    } catch (err) {
+        console.error('Error retrieving read articles:', err);
+        res.status(500).send({ message: 'Error retrieving favourite articles' });
+    }
+});
 
 module.exports = router;

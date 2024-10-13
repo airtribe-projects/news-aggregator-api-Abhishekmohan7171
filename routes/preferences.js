@@ -18,15 +18,11 @@ router.put('/update',validateJwt,async (req,res) => {
         return res.status(401).send({message:'Unauthorized'});
     }
     const id = req.user.id;
-    const dbUser = await User.findById(id);
+    const dbUser = await User.findByIdAndUpdate(id,{preferences:req.body.preferences});
     console.log(dbUser,"->>>>>>>>>>>>>>")
-    let preferences = dbUser.preferences;
-    // const id = req.params.id;
-    // const user = dbUser.find((user) => user.id === id);
-    // console.log(user,"-------------------")
-    preferences = req.body.preferences;
+    preferences = dbUser.preferences;
     res.send({
-        updatedPrefernces: preferences
+        updatedPreferences: preferences
     })
 
 })
