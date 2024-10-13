@@ -140,7 +140,7 @@ cron.schedule('0 * * * *', async () => { // Runs every hour
         const keys = newsCache.keys();
         for (const key of keys) {
             const response = await axios.get(
-                `https://newsapi.org/v2/everything?q=${key}&apiKey=f5a174fd19e140af8a08felae3cca9b4`
+                `https://newsapi.org/v2/everything?q=${key}&apiKey=f5a174fd19e140af8a08fe1ae3cca9b4`
             );
             newsCache.set(key, response.data.articles);
         }
