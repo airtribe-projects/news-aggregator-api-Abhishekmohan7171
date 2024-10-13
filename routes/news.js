@@ -7,6 +7,7 @@ const axios = require("axios");
 const { validateJwt } = require("../middleware/validateJwt");
 const NodeCache = require('node-cache');
 const newsCache = new NodeCache({ stdTTL: 3600 });
+const cron = require('node-cron')
 
 //fetch all news as per user preferences
 router.get("/", validateJwt, async (req, res) => {
@@ -129,6 +130,23 @@ router.get('/favourites',validateJwt, async (req, res) => {
     } catch (err) {
         console.error('Error retrieving read articles:', err);
         res.status(500).send({ message: 'Error retrieving favourite articles' });
+    }
+});
+
+// Periodic Cache Updates for NodeCache
+cron.schedule('0 * * * *', async () => { // Runs every hour
+    try {
+        console.log('Updating cached news articles...');
+        const keys = newsCache.keys();
+        for (const key of keys) {
+            const response = await axios.get(
+                `https://newsapi.org/v2/everything?q=${key}&apiKey=f5a174fd19e140af8a08felae3cca9b4`
+            );
+            newsCache.set(key, response.data.articles);
+        }
+        console.log('Cache update complete');
+    } catch (err) {
+        console.error('Error updating cached news:', err);
     }
 });
 
