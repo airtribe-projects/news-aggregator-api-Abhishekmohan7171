@@ -4,6 +4,8 @@ const app = express();
 const mongoose = require('mongoose');
 const port = process.env.PORT || 3000;
 const userRouter = require('./routes/users');
+const prefRouter = require('./routes/preferences');
+const newsRouter = require('./routes/news');
 
 // Connect to MongoDB
 mongoose.connect(process.env.MONGO).then(() => {
@@ -20,7 +22,9 @@ const logger = (req,res,next) => {
 app.use(logger)
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api/v1/users',userRouter)
+app.use('/api/v1/users', userRouter);
+app.use('/api/v1/preferences', prefRouter);
+app.use('/api/v1/news', newsRouter);
 
 app.listen(port, (err) => {
     if (err) {
